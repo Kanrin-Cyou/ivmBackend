@@ -36,7 +36,7 @@ const summaryForm = {
      'inventoryForm':inventoryForm
 }
 
-const dummyForm = (formType,repeat) => {
+const dummyForm = (formType,repeat,newdata) => {
     const dummyList = [];
     for (var index = 0; index < repeat; index++) { 
         var dummyObject = new Object();
@@ -53,6 +53,7 @@ const dummyForm = (formType,repeat) => {
         })
         dummyList.push(dummyObject)
     }
+    if(newdata!=''){dummyList.push(newdata)}
     return dummyList;
 }
 
@@ -84,9 +85,9 @@ app.post('/mainpage',(req,res)=>{
 //dummy post
 app.post('/form',(req,res)=>{
     const newform = req.body;
-    console.log(newform.formnav);
+    console.log(newform.formnav)
     if (summaryForm.hasOwnProperty(newform.formnav)){
-        res.json(dummyForm(summaryForm[newform.formnav],5))
+        res.json(dummyForm(summaryForm[newform.formnav],5,newform.data))
       } else {
         res.json(dummyForm(inventoryForm,5))
       }
