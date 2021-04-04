@@ -17,53 +17,39 @@ const salt = bcrypt.genSaltSync(saltRounds);
 //     console.log(data);
 // });
 
-const customerForm =['id','客户全称','客户邮编','客户公司地址','客户公司电话','联系人','联系电话','开户银行','银行帐号','联系人信箱','客户传真','状态'];
-const goodsForm =['id','商品名称','产地','规格','包装','生产批号','批准文号','描述','价格','供应商编号','状态'];
-const importsForm =['id','供应商编号','支付类型','进货时间','操作员','数量','注释','商品编号'];
-const returnForm =['id','供应商编号','支付类型','退货时间','操作员','数量','注释','商品编号'];
-const supplyerForm =['id','供应商全称','供应商邮编','公司地址','公司电话','联系人','联系人电话','开户银行','银行帐号','联系人邮箱','公司传真','状态'];
-const salesForm =['id','客户编号','支付类型','销售时间','操作员','数量','注释','商品编号'];
-const salesReturnForm =['id','客户编号','支付类型','退货时间','操作员','数量','注释','商品编号'];
-const inventoryForm =['id','商品编号','数量'];
+
+//Dummy Database
+
+const customer =['id','name','postal','address','telephone','contact_person','contact_person_phone','bank','bank_account','email','fax','status'];
+const supplyer =['id','name','postal','address','telephone','contact_person','contact_person_phone','bank','bank_account','email','fax','status'];
+
+const imports =['id','supplyer_id','payment_type','time','operator','quantity','note','sku'];
+const importsreturn =['id','supplyer_id','payment_type','time','operator','quantity','note','sku'];
+const sales =['id','customer_id','payment_type','time','operator','quantity','note','sku'];
+const salesreturn =['id','customer_id','payment_type','time','operator','quantity','note','sku'];
+
+const goods =['id','name','origin','standard','package','batch','approval','note','price','supplyer_id','status'];
+const inventory =['id','sku','stock'];
+
 const summaryForm = {
-     'customerForm':customerForm,
-     'goodsForm':goodsForm,
-     'importsForm':importsForm,
-     'returnForm':returnForm,
-     'supplyerForm':supplyerForm,
-     'salesForm':salesForm,
-     'salesReturnForm':salesReturnForm,
-     'inventoryForm':inventoryForm
+     'customer':customer,
+     'imports':imports,
+     'importsreturn':importsreturn,
+     'supplyer':supplyer,
+     'sales':sales,
+     'salesreturn':salesreturn,
+     'goods':goods,
+     'inventory':inventory
 }
 
-const dummyForm = (formType,repeat,newdata) => {
-    const dummyList = [];
-    for (var index = 0; index < repeat; index++) { 
-        var dummyObject = new Object();
-        formType.map((item,i) => {
-            if (item.includes("时间")){
-                dummyObject[item] = "2021-02-04T20:0";
-            } else if (item.includes("数量")){
-                dummyObject[item] = "123";
-            } else if (item.includes("id")){
-                dummyObject[item] = index;
-            } else {
-                dummyObject[item] = "hello";
-            }
-        })
-        dummyList.push(dummyObject)
-    }
-    if(newdata!=''){dummyList.push(newdata)}
-    return dummyList;
-}
+//Connect to DataBase
 
 const db = knex({
     client: 'pg',
     connection: {
+      port: '6969',
       host : '127.0.0.1',
-      user : 'guanlun',
-      password : 'your_database_password',
-      database : 'inventory'
+      database : 'IVM'
     }
   });
 
@@ -73,29 +59,26 @@ app.use(bodyParser.json());
 app.use(cors());
 
 app.post('/mainpage',(req,res)=>{
-    res.json(dummyForm(inventoryForm,5))
+    res.json(dummyForm(inventoryForm,10))
 })
 
-// app.post('/mainpage',(req,res)=>{
-//     fetch('https://fakestoreapi.com/products?limit=50')
-//             .then(res=>res.json())
-//             .then(json=>{res.json(json)})
-// })
-
-//dummy post
 app.post('/form',(req,res)=>{
     const newform = req.body;
-    console.log(newform.formnav)
+
     if (summaryForm.hasOwnProperty(newform.formnav)){
-        res.json(dummyForm(summaryForm[newform.formnav],5,newform.data))
-      } else {
-        res.json(dummyForm(inventoryForm,5))
-      }
+
+        if (newform.data !== '') {
+            db.insert(newform.data).into(newform.formnav).then(
+                db.select('*').from(newform.formnav).then(data=>{console.log('added');res.json(data)})
+            )
+        } else {
+            db.select('*').from(newform.formnav).then(data=>{res.json(data)});
+        }
+
+    } else {
+            res.status(400).json('not found in database')
+    }
 })
-// app.post('/form',(req,res)=>{
-//     const newform = req.body;
-//     res.json(newform);
-// })
 
 
 app.post('/signin',(req,res)=>{
