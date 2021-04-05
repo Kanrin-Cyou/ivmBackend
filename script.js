@@ -80,6 +80,23 @@ app.post('/form',(req,res)=>{
     }
 })
 
+app.post('/deletelist',(req,res)=>{
+    const newform = req.body;
+
+    if (summaryForm.hasOwnProperty(newform.formnav)){
+
+        if (newform.deletelist.length !== 0) {
+            newform.deletelist.map((item,i)=>{db.from(newform.formnav).where('id',item).del().then(data=>{data? console.log("deleted"):console.log("not deleted")})})
+        } else {
+            res.status(400).json('not found in database')
+        }
+    } else {
+            res.status(400).json('not found in database')
+    }
+    db.select('*').from(newform.formnav).then(data=>{res.json(data)});
+})
+
+
 
 app.post('/signin',(req,res)=>{
     db.select('email','hash').from('login')
