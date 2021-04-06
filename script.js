@@ -17,9 +17,7 @@ const salt = bcrypt.genSaltSync(saltRounds);
 //     console.log(data);
 // });
 
-
-//Dummy Database
-
+//Constant
 const customer =['id','name','postal','address','telephone','contact_person','contact_person_phone','bank','bank_account','email','fax','status'];
 const supplyer =['id','name','postal','address','telephone','contact_person','contact_person_phone','bank','bank_account','email','fax','status'];
 
@@ -62,23 +60,24 @@ app.post('/mainpage',(req,res)=>{
     res.json(dummyForm(inventoryForm,10))
 })
 
+//add
+
 app.post('/form',(req,res)=>{
     const newform = req.body;
-
     if (summaryForm.hasOwnProperty(newform.formnav)){
-
         if (newform.data !== '') {
             db.insert(newform.data).into(newform.formnav).then(
-                db.select('*').from(newform.formnav).then(data=>{console.log('added');res.json(data)})
+                data=>{console.log("added",data);db.select('*').from(newform.formnav).then(data=>res.json(data))}
             )
         } else {
-            db.select('*').from(newform.formnav).then(data=>{res.json(data)});
+            db.select('*').from(newform.formnav).then(data=>res.json(data));
         }
-
     } else {
             res.status(400).json('not found in database')
     }
 })
+
+//delete
 
 app.post('/deletelist',(req,res)=>{
     const newform = req.body;
@@ -96,7 +95,13 @@ app.post('/deletelist',(req,res)=>{
     db.select('*').from(newform.formnav).then(data=>{res.json(data)});
 })
 
+//modify
 
+
+//search
+
+
+// ---- ***** Signin System ***** ----
 
 app.post('/signin',(req,res)=>{
     db.select('email','hash').from('login')
