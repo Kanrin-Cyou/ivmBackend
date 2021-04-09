@@ -97,6 +97,25 @@ app.post('/deletelist',(req,res)=>{
 
 //modify
 
+app.post('/modifylist',(req,res)=>{
+
+    const newform = req.body;
+    console.log(newform.formnav,newform.modifyform,newform.modifyform.id)
+
+    if (summaryForm.hasOwnProperty(newform.formnav)){
+        if (newform.modifyform.length !== 0) {
+            db.from(newform.formnav)
+            .where('id',newform.modifyform.id)
+            .update(newform.modifyform)
+            .then(data=>{data? console.log("Updated"):console.log("not Updated")})     
+        } else {
+            res.status(400).json('not found in database')
+        }
+    } else {
+            res.status(400).json('not found in database')
+    }
+    db.select('*').from(newform.formnav).then(data=>{res.json(data)});
+})
 
 //search
 
