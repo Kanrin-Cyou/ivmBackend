@@ -4,18 +4,14 @@ import fetch from "node-fetch";
 import cors from 'cors';
 import knex from 'knex';
 import bcrypt from 'bcrypt';
-const saltRounds = 10;
-const salt = bcrypt.genSaltSync(saltRounds);
+// const saltRounds = 10;
+// const salt = bcrypt.genSaltSync(saltRounds);
 
 // --> res= this is working
 // --> /signin --> POST = success/fail
 // --> /register --> POST = user
 // /profile/:userID --> GET = user
 // /image --> PUT --> user
-
-// db.select('*').from('users').then(data=>{
-//     console.log(data);
-// });
 
 //Constant
 const customer =['id','name','postal','address','telephone','contact_person','contact_person_phone','bank','bank_account','email','fax','status'];
@@ -51,7 +47,6 @@ const db = knex({
     }
   });
 
-
 const app = express();
 app.use(bodyParser.json());
 app.use(cors());
@@ -61,7 +56,6 @@ app.post('/mainpage',(req,res)=>{
 })
 
 //add
-
 app.post('/form',(req,res)=>{
     const newform = req.body;
     if (summaryForm.hasOwnProperty(newform.formnav)){
@@ -78,7 +72,6 @@ app.post('/form',(req,res)=>{
 })
 
 //delete
-
 app.post('/deletelist',(req,res)=>{
     const newform = req.body;
 
@@ -122,33 +115,58 @@ app.post('/modifylist',(req,res)=>{
 
 // ---- ***** Signin System ***** ----
 
-app.post('/signin',(req,res)=>{
-    db.select('email','hash').from('login')
-    .where('email', '=', req.body.email)
-    .then(data=>{
-        const isValid = bcrypt.compareSync(req.body.password, data[0].hash);
-        if (isValid){
-            return db.select('*').from('users')
-            .where('email','=',req.body.email)
-            .then(user => {
-                res.json(user[0])
-            })
-            .catch(err=> res.status(400).json('unable to get user'))
-        } else {
-            res.status(400).json('wrong credentials')
+const dummyUser = {
+    users: [
+        {
+            id:'123',
+            name:'John',
+            email:'john@gmail.com',
+            password:'cookies',
+            entries:0,
+            joined: new Date()
+        },
+        {
+            id:'124',
+            name:'Sally',
+            email:'sally@gmail.com',
+            password:'bananas',
+            entries:0,
+            joined: new Date()
         }
-    })
-    .catch(err => res.status(400).json('wrong credentials'))
-    // if (req.body.email === database.users[0].email &&
-    //     req.body.password === database.users[0].password) {
-    //     res.json('success');     
-    // } else {
-    //     res.status(400).json('error logging in');
-    // }
+    ]
+}
+
+app.post('/signin',(req,res)=>{
+    console.log(req.body)
+    if (req.body.email === dummyUser.users[0].email &&
+    req.body.password === dummyUser.users[0].password) {
+    console.log("pass")
+    res.json(dummyUser.users[0]);     
+    } else {
+        res.status(400).json('error logging in');
+    }
+
+    // db.select('email','hash').from('login')
+    // .where('email', '=', req.body.email)
+    // .then(data=>{
+    //     const isValid = bcrypt.compareSync(req.body.password, data[0].hash);
+    //     if (isValid){
+    //         return db.select('*').from('users')
+    //         .where('email','=',req.body.email)
+    //         .then(user => {
+    //             res.json(user[0])
+    //         })
+    //         .catch(err=> res.status(400).json('unable to get user'))
+    //     } else {
+    //         res.status(400).json('wrong credentials')
+    //     }
+    // })
+    // .catch(err => res.status(400).json('wrong credentials'))
+
 })
 
-app.post('/register',(req,res)=>{
-    const {email,name,password} = req.body;
+// app.post('/register',(req,res)=>{
+//     const {email,name,password} = req.body;
     // database.users.push({
     //     id:'125',
     //     name:name,
@@ -157,43 +175,45 @@ app.post('/register',(req,res)=>{
     //     entries:0,
     //     joined: new Date()
     // })
-    const hash = bcrypt.hashSync(password,salt);
-    db.transaction(trx => {
-        trx.insert({
-            hash: hash,
-            email: email
-        })
-        .into('login')
-        .returning('email')
-        .then(loginEmail => {
-            return trx('users')
-            .returning('*')
-            .insert({
-                email:loginEmail[0],
-                name:name,
-                joined: new Date()
-                })
-                .then(user=>{
-                res.json(user[0]);
-            })
-        })
-        .then(trx.commit)
-        .catch(trx.rollback)
-    })
-    .catch(err => res.status(400).json('unable to register'))
-})
 
-app.get('/profile/:id',(req,res)=>{
-    const {id} = req.params;
-    // let found = false;
-    db.select('*').from('users').where({id})
-    .then(user=>{
-        if(user.length){
-            res.json(user[0])
-        } else {
-            res.status(400).json('Not Found')
-        }
-    })
+
+//     const hash = bcrypt.hashSync(password,salt);
+//     db.transaction(trx => {
+//         trx.insert({
+//             hash: hash,
+//             email: email
+//         })
+//         .into('login')
+//         .returning('email')
+//         .then(loginEmail => {
+//             return trx('users')
+//             .returning('*')
+//             .insert({
+//                 email:loginEmail[0],
+//                 name:name,
+//                 joined: new Date()
+//                 })
+//                 .then(user=>{
+//                 res.json(user[0]);
+//             })
+//         })
+//         .then(trx.commit)
+//         .catch(trx.rollback)
+//     })
+//     .catch(err => res.status(400).json('unable to register'))
+// })
+
+// app.get('/profile/:id',(req,res)=>{
+//     const {id} = req.params;
+//     // let found = false;
+//     db.select('*').from('users').where({id})
+//     .then(user=>{
+//         if(user.length){
+//             res.json(user[0])
+//         } else {
+//             res.status(400).json('Not Found')
+//         }
+//     })
     // database.users.forEach(user => {
     //     if(user.id === id){
     //         found = true;
@@ -203,18 +223,18 @@ app.get('/profile/:id',(req,res)=>{
     // if (!found) {
     //     res.status(400).json('no such user');
     // }
-})
+// })
 
-app.put('/image',(req,res)=>{
-    const {id} = req.body;
-    console.log(id)
-    db('users').where('id','=',id)
-    .increment('entries',1)
-    .returning('entries')
-    .then(entries => {
-        console.log(entries);
-    })  
-})
+// app.put('/image',(req,res)=>{
+//     const {id} = req.body;
+//     console.log(id)
+//     db('users').where('id','=',id)
+//     .increment('entries',1)
+//     .returning('entries')
+//     .then(entries => {
+//         console.log(entries);
+//     })  
+// })
     // let found = false;
     // database.users.forEach(user => {
     //     if(user.id === id){
@@ -234,23 +254,3 @@ app.listen(3001, ()=>{
 });
 
 
-// const database = {
-//     users: [
-//         {
-//             id:'123',
-//             name:'John',
-//             email:'john@gmail.com',
-//             password:'cookies',
-//             entries:0,
-//             joined: new Date()
-//         },
-//         {
-//             id:'124',
-//             name:'Sally',
-//             email:'sally@gmail.com',
-//             password:'bananas',
-//             entries:0,
-//             joined: new Date()
-//         }
-//     ]
-// }
