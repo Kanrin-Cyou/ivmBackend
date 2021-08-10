@@ -2,13 +2,12 @@ import express, { response } from 'express';
 import bodyParser from 'body-parser';
 import cors from 'cors';
 import knex from 'knex';
-
 import signin from './controllers/signin.js';
-// import register from './controllers/register.js';
+import register from './controllers/register.js';
 import profile from './controllers/profile.js';
 import sql from './controllers/sql.js';
 
-
+ 
 
 // --> res= this is working
 // --> /signin --> POST = success/fail
@@ -30,8 +29,8 @@ const app = express();
 app.use(bodyParser.json());
 app.use(cors());
 
-
-app.post('/signin', (req,res)=> {signin.handleSignIn(req,res,db)});
+app.post('/signin', (req,res)=> {signin.signinAuthentication(req,res,db)});
+app.post('/register', (req,res)=> {register.handleRegister(req,res,db)});
 app.post('/profileUpdate', (req,res)=> {profile.handleProfileUpdate(req,res,db)});
 
 app.post('/form', (req,res)=> {sql.handleSQLadd(req,res,db)});
